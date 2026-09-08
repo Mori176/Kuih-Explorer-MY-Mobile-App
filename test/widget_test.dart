@@ -1,30 +1,54 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:kuih_explorer_my/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('renders the kuih catalog', (tester) async {
+    await tester.pumpWidget(const KuihExplorerApp());
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    expect(find.text('Kuih Explorer MY'), findsOneWidget);
+    expect(find.text('Ang Ku Kuih'), findsOneWidget);
+    expect(find.text('Apam Balik'), findsOneWidget);
+  });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
+  testWidgets('search filters the catalog', (tester) async {
+    await tester.pumpWidget(const KuihExplorerApp());
+
+    await tester.enterText(find.byType(TextField), 'lapis');
     await tester.pump();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(find.text('Kuih Lapis'), findsOneWidget);
+    expect(find.text('Ang Ku Kuih'), findsNothing);
+  });
+
+  testWidgets('category filter narrows the catalog', (tester) async {
+    await tester.pumpWidget(const KuihExplorerApp());
+
+    await tester.tap(find.text('Fried'));
+    await tester.pump();
+
+    expect(find.text('Karipap'), findsOneWidget);
+    expect(find.text('Ang Ku Kuih'), findsNothing);
+  });
+
+  testWidgets('opens detail screen and toggles favourite', (tester) async {
+    await tester.pumpWidget(const KuihExplorerApp());
+
+    await tester.tap(find.text('Ang Ku Kuih'));
+    await tester.pumpAndSettle();
+    expect(find.text('About'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Favourite'));
+    await tester.pumpAndSettle();
+
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Favourites only'));
+    await tester.pump();
+
+    expect(find.text('Ang Ku Kuih'), findsOneWidget);
+    expect(find.text('Apam Balik'), findsNothing);
   });
 }
